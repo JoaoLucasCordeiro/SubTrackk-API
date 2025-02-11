@@ -1,9 +1,9 @@
 import { Router } from "express"
 
-const authRouter = Router();
+const authRoutes = Router();
 
-authRouter.post('sign-up', (req, res) => res.send({ title: 'Sign Up' }));
-authRouter.post('sign-in', (req, res) => res.send({ title: 'Sign In' }));
-authRouter.post('sign-out', (req, res) => res.send({ title: 'Sign Out' }));
+authRoutes.post('sign-up', (req, res) => res.send({ title: 'Sign Up' }));
+authRoutes.post('sign-in', (req, res) => res.send({ title: 'Sign In' }));
+authRoutes.post('sign-out', (req, res) => res.send({ title: 'Sign Out' }));
 
-export default authRouter;
+export default authRoutes;
