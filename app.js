@@ -4,6 +4,7 @@ import { PORT } from './config/env.js'
 import userRoutes from './routes/user.routes.js';
 import authRoutes from './routes/auth.routes.js';
 import subscriptionRoutes from './routes/subscription.routes.js';
+import connectToDataBase from './database/mongodb.js';
 
 
 const app = express();
@@ -16,8 +17,10 @@ app.get('/', (req, res) => {
     res.send('Welcome to SubTrackk API');
 })
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
     console.log(`Server is running on http://localhost:${PORT}`);
+
+     await connectToDataBase();
 });
 
 export default app;
