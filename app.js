@@ -5,6 +5,7 @@ import userRoutes from './routes/user.routes.js';
 import authRoutes from './routes/auth.routes.js';
 import subscriptionRoutes from './routes/subscription.routes.js';
 import connectToDataBase from './database/mongodb.js';
+import errorMiddleware from './middleware/error.middleware.js';
 
 
 const app = express();
@@ -12,6 +13,8 @@ const app = express();
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/subscriptions', subscriptionRoutes);
+
+app.use(errorMiddleware);
 
 app.get('/', (req, res) => {
     res.send('Welcome to SubTrackk API');
