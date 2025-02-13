@@ -1,91 +1,90 @@
 import mongoose from 'mongoose';
 
 const subscriptionSchema = new mongoose.Schema({
-
-    name: {
-        type: String,
-        required: [true, 'Subscription name is required'],
-        trim: true,
-        minLenght: 2,
-        maxLength: 100
-    },
-    price: {
-        type: Number,
-        required: [true, 'Subscription price is required'],
-        min: 0,
-    },
-    currency: {
-        type: String,
-        enum: ['USD', 'BRL'],
-        default: 'BRL',
-    },
-    frequency: {
-        type: String,
-        enum: ['semanal', 'mensal', 'anual'],
-        default: 'mensal',
-    },
-    category: {
-        type: String,
-        enum: ['streaming', 'musica', 'comida', 'outros'],
-        required: true,
-    },
-    paymentMethod: {
-        type: String,
-        required: true,
-        trim: true,
-    },
-    status: {
-        type: String,
-        enum: ['ativo', 'cancelado', 'expirado'],
-        default: 'ativo',
-    },
-    startDate: {
-        type: Date,
-        required: true,
-        validate: {
-            validator: (value) => value <= new Date(),
-            message: 'Data de início não pode ser no futuro',
-        }
-    },
-    renewalDate: {
-        type: Date,
-        validate: {
-            validator: function (value) {
-                return value > this.startDate
-            },
-            message: 'Data de renovação deve ser maior que a data de início',
-        }
-    },
-    user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true,
-        index: true,
+  name: {
+    type: String,
+    required: [true, 'Subscription name is required'],
+    trim: true,
+    minLength: 2,
+    maxLength: 100,
+  },
+  price: {
+    type: Number,
+    required: [true, 'Subscription price is required'],
+    min: [0, 'Price must be greater than 0']
+  },
+  currency: {
+    type: String,
+    enum: ['BRL', 'USD'],
+    default: 'BRL'
+  },
+  frequency: {
+    type: String,
+    enum: ['daily', 'weekly', 'monthly', 'yearly'],
+  },
+  category: {
+    type: String,
+    enum: ['sports', 'news', 'entertainment', 'lifestyle', 'technology', 'finance', 'politics', 'other'],
+    required: true,
+  },
+  paymentMethod: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  status: {
+    type: String,
+    enum: ['active', 'cancelled', 'expired'],
+    default: 'active'
+  },
+  startDate: {
+    type: Date,
+    required: true,
+    validate: {
+      validator: (value) => value <= new Date(),
+      message: 'Start date must be in the past',
     }
-
-
+  },
+  renewalDate: {
+    type: Date,
+    validate: {
+      validator: function (value) {
+        return value > this.startDate;
+      },
+      message: 'Renewal date must be after the start date',
+    }
+  },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+    index: true,
+  }
 }, { timestamps: true });
 
 
+// Auto-calculate renewal date if missing.
 subscriptionSchema.pre('save', function (next) {
-    if (!renewalDate) {
-        const renewalDate = {
-            'semanal': 7,
-            'mensal': 30,
-            'anual': 365,
-        }
+  if(!this.renewalDate) {
+    const renewalPeriods = {
+      daily: 1,
+      weekly: 7,
+      monthly: 30,
+      yearly: 365,
+    };
 
-        this.renewalDate = new Date(this.startDate);
-        this.renewalDate.setDate(this.renewalDate.getDate() + renewalDate[this.frequency]);
-    }
+    this.renewalDate = new Date(this.startDate);
+    this.renewalDate.setDate(this.renewalDate.getDate() + renewalPeriods[this.frequency]);
+  }
 
-    if (this.renewalDate < new Date()) {
-        this.status = 'expirado';
-    }
+  // Auto-update the status if renewal date has passed
+  if (this.renewalDate < new Date()) {
+    this.status = 'expired';
+  }
 
-    next();
-})
+  next();
+});
 
-const subscription = mongoose.model('Subscription', subscriptionSchema);
+const Subscription = mongoose.model('Subscription', subscriptionSchema);
 
-export default subscription;
+export default Subscription;
